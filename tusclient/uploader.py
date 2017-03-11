@@ -152,7 +152,7 @@ class Uploader(object):
         Confirm that the last upload was sucessful.
         Raises TusUploadFailed exception if the upload was not sucessful.
         """
-        if self.request.status_code == 204:
+        if self.request.status_code == 204 or self.request.status_code == 200:
             return True
         else:
             raise TusUploadFailed
