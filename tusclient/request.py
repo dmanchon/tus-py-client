@@ -27,7 +27,11 @@ class TusRequest(object):
         self.handle.setopt(pycurl.CUSTOMREQUEST, 'PATCH')
 
         self.file = uploader.get_file_stream()
-        self.file.seek(uploader.offset)
+        if uploader.is_stream:
+            offset = 0
+        else:
+            offset = uploader.offset
+        self.file.seek(offset)
         self.handle.setopt(pycurl.READFUNCTION, self.file.read)
         self.handle.setopt(pycurl.INFILESIZE, uploader.request_length)
 

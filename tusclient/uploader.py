@@ -55,13 +55,14 @@ class Uploader(object):
     DEFAULT_CHUNK_SIZE = 2 * 1024 * 1024  # 2kb
 
     def __init__(self, file_path=None, file_stream=None, url=None, client=None,
-                 chunk_size=None, metadata=None):
+                 chunk_size=None, metadata=None, filesize=None):
         if not any((file_path, file_stream)):
             raise ValueError("Either 'file_path' or 'file_stream' cannot be None.")
 
         if url is None and client is None:
             raise ValueError("Either 'url' or 'client' cannot be None.")
 
+        self.filesize = filesize
         self.file_path = file_path
         self.file_stream = file_stream
         self.stop_at = self.file_size
@@ -71,7 +72,8 @@ class Uploader(object):
         self.offset = self.get_offset()
         self.chunk_size = chunk_size or self.DEFAULT_CHUNK_SIZE
         self.request = None
-
+        self.is_stream = False
+        
     # it is important to have this as a @property so it gets
     # updated client headers.
     @property
@@ -174,6 +176,8 @@ class Uploader(object):
         """
         Return size of the file.
         """
+        if self.filesize:
+            return self.filesize
         stream = self.get_file_stream()
         stream.seek(0, os.SEEK_END)
         return stream.tell()
@@ -215,3 +219,8 @@ class Uploader(object):
         self.offset = int(self.request.response_headers.get('upload-offset'))
         msg = '{} bytes uploaded ...'.format(self.offset)
         print(msg)
+        
+    def upload_chunk_stream(self, chunk_size):
+        self.chunk_size = chunk_size
+        self.is_stream = True
+        self.upload_chunk()
