@@ -119,7 +119,11 @@ class Uploader(object):
                 msg = 'Upload-metadata key "{}" cannot be empty nor contain spaces or commas.'
                 raise ValueError(msg.format(key_str))
 
-            value_bytes = b(value)  # python 3 only encodes bytes
+            if type(value) == bytes:
+                value_bytes = value
+            else:
+                value_bytes = value.encode('utf-8')
+                
             encoded_list.append('{} {}'.format(key_str, b64encode(value_bytes).decode('ascii')))
         return encoded_list
 
